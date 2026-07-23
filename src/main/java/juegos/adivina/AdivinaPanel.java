@@ -280,11 +280,11 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
 
-        contenido.setBorder(BorderFactory.createEmptyBorder(28, 36, 24, 36));
+        contenido.setBorder(BorderFactory.createEmptyBorder(16, 18, 14, 18));
 
         contenido.add(crearEncabezado());
 
-        contenido.add(Box.createVerticalStrut(20));
+        contenido.add(Box.createVerticalStrut(12));
 
         contenido.add(crearFilaColumnas());
 
@@ -308,33 +308,69 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
      */
     private JPanel crearEncabezado() {
 
-        JPanel panel = new JPanel();
+        JPanel panel = new JPanel(new java.awt.BorderLayout());
 
         panel.setOpaque(false);
 
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel textos = new JPanel();
+
+        textos.setOpaque(false);
+
+        textos.setLayout(new BoxLayout(textos, BoxLayout.Y_AXIS));
 
         JLabel lblTitulo = new JLabel("Adivina el Número");
 
-        lblTitulo.setFont(new Font("SansSerif", Font.BOLD, 30));
+        lblTitulo.setFont(new Font("SansSerif", Font.BOLD, 26));
 
         lblTitulo.setForeground(TEXTO_PRINCIPAL);
 
         JLabel lblSubtitulo = new JLabel();
 
-        lblSubtitulo.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        lblSubtitulo.setFont(new Font("SansSerif", Font.PLAIN, 13));
 
         lblSubtitulo.setForeground(TEXTO_APOYO);
 
         lblSubtitulo.setName("subtitulo");
 
-        panel.add(lblTitulo);
+        textos.add(lblTitulo);
 
-        panel.add(Box.createVerticalStrut(4));
+        textos.add(Box.createVerticalStrut(3));
 
-        panel.add(lblSubtitulo);
+        textos.add(lblSubtitulo);
+
+        JButton botonReiniciar = new JButton("🔄  Reiniciar partida");
+
+        botonReiniciar.setFont(new Font("SansSerif", Font.PLAIN, 13));
+
+        botonReiniciar.setForeground(new Color(60, 60, 60));
+
+        botonReiniciar.setBackground(new Color(238, 238, 242));
+
+        botonReiniciar.setOpaque(true);
+
+        botonReiniciar.setBorderPainted(false);
+
+        botonReiniciar.setFocusPainted(false);
+
+        botonReiniciar.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
+
+        botonReiniciar.addActionListener(e -> reiniciar());
+
+        JPanel envolturaBoton = new JPanel();
+
+        envolturaBoton.setOpaque(false);
+
+        envolturaBoton.setLayout(new java.awt.GridBagLayout());
+
+        envolturaBoton.add(botonReiniciar);
+
+        panel.add(textos, java.awt.BorderLayout.WEST);
+
+        panel.add(envolturaBoton, java.awt.BorderLayout.EAST);
+
+        expandirAncho(panel);
 
         return panel;
 
@@ -368,15 +404,23 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         c.weightx = 0.24;
 
-        c.insets = new Insets(0, 0, 0, 20);
+        c.insets = new Insets(0, 0, 0, 12);
 
-        fila.add(crearColumnaIzquierda(), c);
+        JPanel columnaIzquierda = crearColumnaIzquierda();
+
+        columnaIzquierda.setPreferredSize(new Dimension(148, 10));
+
+        fila.add(columnaIzquierda, c);
 
         c.gridx = 1;
 
         c.weightx = 0.50;
 
-        fila.add(crearColumnaCentro(), c);
+        JPanel columnaCentro = crearColumnaCentro();
+
+        columnaCentro.setPreferredSize(new Dimension(300, 10));
+
+        fila.add(columnaCentro, c);
 
         c.gridx = 2;
 
@@ -384,7 +428,11 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         c.insets = new Insets(0, 0, 0, 0);
 
-        fila.add(crearColumnaDerecha(), c);
+        JPanel columnaDerecha = crearColumnaDerecha();
+
+        columnaDerecha.setPreferredSize(new Dimension(160, 10));
+
+        fila.add(columnaDerecha, c);
 
         return fila;
 
@@ -409,11 +457,11 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         columna.add(crearTarjetaDificultad());
 
-        columna.add(Box.createVerticalStrut(18));
+        columna.add(Box.createVerticalStrut(12));
 
         columna.add(crearTarjetaIntentos());
 
-        columna.add(Box.createVerticalStrut(18));
+        columna.add(Box.createVerticalStrut(12));
 
         columna.add(crearTarjetaTiempo());
 
@@ -430,7 +478,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         TarjetaRedondeada tarjeta = new TarjetaRedondeada(Color.WHITE);
 
-        tarjeta.setBorder(BorderFactory.createEmptyBorder(16, 18, 16, 18));
+        tarjeta.setBorder(BorderFactory.createEmptyBorder(11, 14, 11, 14));
 
         tarjeta.add(crearEtiquetaSeccion("Dificultad"));
 
@@ -478,7 +526,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         TarjetaRedondeada tarjeta = new TarjetaRedondeada(Color.WHITE);
 
-        tarjeta.setBorder(BorderFactory.createEmptyBorder(16, 18, 16, 18));
+        tarjeta.setBorder(BorderFactory.createEmptyBorder(11, 14, 11, 14));
 
         tarjeta.add(crearEtiquetaSeccion("Intentos"));
 
@@ -488,7 +536,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         lblIntentosContador.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        lblIntentosContador.setFont(new Font("SansSerif", Font.BOLD, 22));
+        lblIntentosContador.setFont(new Font("SansSerif", Font.BOLD, 19));
 
         lblIntentosContador.setForeground(TEXTO_PRINCIPAL);
 
@@ -519,7 +567,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         TarjetaRedondeada tarjeta = new TarjetaRedondeada(Color.WHITE);
 
-        tarjeta.setBorder(BorderFactory.createEmptyBorder(16, 18, 16, 18));
+        tarjeta.setBorder(BorderFactory.createEmptyBorder(11, 14, 11, 14));
 
         tarjeta.add(crearEtiquetaSeccion("🕐  Tiempo"));
 
@@ -529,7 +577,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         lblTiempo.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        lblTiempo.setFont(new Font("SansSerif", Font.BOLD, 22));
+        lblTiempo.setFont(new Font("SansSerif", Font.BOLD, 19));
 
         lblTiempo.setForeground(TEXTO_PRINCIPAL);
 
@@ -560,7 +608,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         columna.add(crearTarjetaEntrada());
 
-        columna.add(Box.createVerticalStrut(18));
+        columna.add(Box.createVerticalStrut(12));
 
         columna.add(crearTarjetaHistorial());
 
@@ -578,7 +626,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         TarjetaRedondeada tarjeta = new TarjetaRedondeada(Color.WHITE);
 
-        tarjeta.setBorder(BorderFactory.createEmptyBorder(18, 20, 18, 20));
+        tarjeta.setBorder(BorderFactory.createEmptyBorder(12, 14, 12, 14));
 
         JPanel filaEntrada = new JPanel();
 
@@ -709,7 +757,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         tarjetaMensaje.setLayout(new BoxLayout(tarjetaMensaje, BoxLayout.Y_AXIS));
 
-        tarjetaMensaje.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        tarjetaMensaje.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
 
         tarjetaMensaje.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -717,7 +765,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         lblTituloMensaje.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        lblTituloMensaje.setFont(new Font("SansSerif", Font.BOLD, 17));
+        lblTituloMensaje.setFont(new Font("SansSerif", Font.BOLD, 15));
 
         lblDescripcionMensaje = new JLabel(" ");
 
@@ -748,7 +796,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         TarjetaRedondeada tarjeta = new TarjetaRedondeada(Color.WHITE);
 
-        tarjeta.setBorder(BorderFactory.createEmptyBorder(18, 20, 16, 20));
+        tarjeta.setBorder(BorderFactory.createEmptyBorder(12, 14, 10, 14));
 
         tarjeta.add(crearEtiquetaSeccion("Historial de intentos"));
 
@@ -815,7 +863,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         JScrollPane scrollTabla = new JScrollPane(tablaHistorial);
 
-        scrollTabla.setPreferredSize(new Dimension(100, 190));
+        scrollTabla.setPreferredSize(new Dimension(100, 130));
 
         scrollTabla.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -858,11 +906,11 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         columna.add(crearTarjetaPuntuacion());
 
-        columna.add(Box.createVerticalStrut(18));
+        columna.add(Box.createVerticalStrut(12));
 
         columna.add(crearTarjetaRecord());
 
-        columna.add(Box.createVerticalStrut(18));
+        columna.add(Box.createVerticalStrut(12));
 
         columna.add(crearTarjetaPista());
 
@@ -879,7 +927,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         TarjetaRedondeada tarjeta = new TarjetaRedondeada(FONDO_PUNTUACION);
 
-        tarjeta.setBorder(BorderFactory.createEmptyBorder(18, 16, 18, 16));
+        tarjeta.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         tarjeta.add(crearEncabezadoTarjetaColor("🏆", "Puntuación", ACENTO_PUNTUACION));
 
@@ -889,7 +937,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         lblPuntuacion.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        lblPuntuacion.setFont(new Font("SansSerif", Font.BOLD, 26));
+        lblPuntuacion.setFont(new Font("SansSerif", Font.BOLD, 22));
 
         lblPuntuacion.setForeground(TEXTO_PRINCIPAL);
 
@@ -922,7 +970,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         TarjetaRedondeada tarjeta = new TarjetaRedondeada(FONDO_RECORD);
 
-        tarjeta.setBorder(BorderFactory.createEmptyBorder(18, 16, 18, 16));
+        tarjeta.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         tarjeta.add(crearEncabezadoTarjetaColor("⚡", "Récord", ACENTO_RECORD));
 
@@ -932,7 +980,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         lblRecordIntentos.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        lblRecordIntentos.setFont(new Font("SansSerif", Font.BOLD, 18));
+        lblRecordIntentos.setFont(new Font("SansSerif", Font.BOLD, 16));
 
         lblRecordIntentos.setForeground(TEXTO_PRINCIPAL);
 
@@ -965,7 +1013,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         TarjetaRedondeada tarjeta = new TarjetaRedondeada(FONDO_PISTA);
 
-        tarjeta.setBorder(BorderFactory.createEmptyBorder(18, 16, 18, 16));
+        tarjeta.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         tarjeta.add(crearEncabezadoTarjetaColor("💡", "Pista", ACENTO_PISTA));
 
@@ -1208,7 +1256,9 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         Resultado resultado = modelo.procesarIntento(numero);
 
-        registrarFilaHistorial(numero, resultado, proporcionLejania);
+        CategoriaCercania categoria = categorizarCercania(resultado, proporcionLejania);
+
+        registrarFilaHistorial(numero, categoria);
 
         switch (resultado) {
 
@@ -1226,17 +1276,17 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
             case MAYOR:
 
-                actualizarTarjetaMensaje("🧊", "Muy bajo",
+                actualizarTarjetaMensaje(categoria.icono, categoria.etiqueta,
                         "El número que ingresaste es menor al número secreto. Intenta con uno más alto.",
-                        new Color(222, 236, 255), COLOR_BAJO);
+                        mezclar(categoria.color, Color.WHITE, 0.82), categoria.color);
 
                 break;
 
             case MENOR:
 
-                actualizarTarjetaMensaje("🔥", "Muy alto",
+                actualizarTarjetaMensaje(categoria.icono, categoria.etiqueta,
                         "El número que ingresaste es mayor al número secreto. Intenta con uno más bajo.",
-                        new Color(253, 240, 219), COLOR_ALTO);
+                        mezclar(categoria.color, Color.WHITE, 0.82), categoria.color);
 
                 break;
 
@@ -1267,64 +1317,91 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
     }
 
     /**
-     * Registra una fila en la tabla de historial para el
-     * intento recién realizado.
+     * Determina la categoría de cercanía de un intento, usada
+     * tanto en el mensaje principal como en el historial, para
+     * que ambos siempre coincidan.
      *
-     * @param numero            Número propuesto.
      * @param resultado         Resultado del intento.
      * @param proporcionLejania Proporción de distancia (0 a 1).
+     *
+     * @return Categoría de cercanía correspondiente.
      */
-    private void registrarFilaHistorial(int numero, Resultado resultado, double proporcionLejania) {
-
-        String categoria;
-
-        Color color;
+    private CategoriaCercania categorizarCercania(Resultado resultado, double proporcionLejania) {
 
         if (resultado == Resultado.ACIERTO) {
 
-            categoria = "¡Acierto!";
-
-            color = COLOR_CERCA;
-
-        } else if (proporcionLejania <= 0.05) {
-
-            categoria = "Muy cerca";
-
-            color = COLOR_CERCA;
-
-        } else if (proporcionLejania <= 0.15) {
-
-            categoria = "Cerca";
-
-            color = COLOR_TIBIO;
-
-        } else if (proporcionLejania <= 0.35) {
-
-            categoria = "Lejos";
-
-            color = COLOR_LEJOS;
-
-        } else if (resultado == Resultado.MENOR) {
-
-            categoria = "Muy alto";
-
-            color = COLOR_ALTO;
-
-        } else {
-
-            categoria = "Muy bajo";
-
-            color = COLOR_BAJO;
+            return new CategoriaCercania("¡Acierto!", COLOR_CERCA, "🎉");
 
         }
+
+        if (proporcionLejania <= 0.05) {
+
+            return new CategoriaCercania("Muy cerca", COLOR_CERCA, "😊");
+
+        }
+
+        if (proporcionLejania <= 0.15) {
+
+            return new CategoriaCercania("Cerca", COLOR_TIBIO, "🙂");
+
+        }
+
+        if (proporcionLejania <= 0.35) {
+
+            return new CategoriaCercania("Lejos", COLOR_LEJOS, "😐");
+
+        }
+
+        if (resultado == Resultado.MENOR) {
+
+            return new CategoriaCercania("Muy alto", COLOR_ALTO, "🔥");
+
+        }
+
+        return new CategoriaCercania("Muy bajo", COLOR_BAJO, "🧊");
+
+    }
+
+    /**
+     * Interpola linealmente entre dos colores.
+     *
+     * @param origen  Color en t = 0.
+     * @param destino Color en t = 1.
+     * @param t       Proporción entre 0 y 1.
+     *
+     * @return Color interpolado.
+     */
+    private static Color mezclar(Color origen, Color destino, double t) {
+
+        double proporcion = Math.max(0, Math.min(1, t));
+
+        int r = (int) Math.round(origen.getRed() + (destino.getRed() - origen.getRed()) * proporcion);
+
+        int g = (int) Math.round(origen.getGreen() + (destino.getGreen() - origen.getGreen()) * proporcion);
+
+        int b = (int) Math.round(origen.getBlue() + (destino.getBlue() - origen.getBlue()) * proporcion);
+
+        return new Color(r, g, b);
+
+    }
+
+    /**
+     * Registra una fila en la tabla de historial para el
+     * intento recién realizado, usando la misma categoría de
+     * cercanía mostrada en el mensaje principal.
+     *
+     * @param numero    Número propuesto.
+     * @param categoria Categoría de cercanía ya calculada.
+     */
+    private void registrarFilaHistorial(int numero, CategoriaCercania categoria) {
 
         int indiceFila = modeloHistorial.getRowCount() + 1;
 
         String hora = LocalTime.now().format(FORMATO_HORA);
 
-        modeloHistorial.addRow(new Object[]{indiceFila, numero, categoria, hora});
+        modeloHistorial.addRow(new Object[]{indiceFila, numero, categoria.etiqueta, hora});
 
-        coloresHistorial.add(color);
+        coloresHistorial.add(categoria.color);
 
         int ultimaFila = tablaHistorial.getRowCount() - 1;
 
@@ -1459,7 +1536,7 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         lblTituloMensaje.setForeground(colorTexto);
 
-        lblDescripcionMensaje.setText("<html><div style='text-align:center;width:260px'>"
+        lblDescripcionMensaje.setText("<html><div style='text-align:center;width:220px'>"
                 + descripcion + "</div></html>");
 
     }
@@ -1748,6 +1825,38 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
         modelo.reiniciar();
 
         iniciarNuevaRonda();
+
+    }
+
+    /**
+     * ============================================================
+     * CLASE INTERNA CategoriaCercania
+     * ============================================================
+     *
+     * Agrupa la etiqueta, el color y el icono correspondientes a
+     * una categoría de cercanía (Muy cerca, Cerca, Lejos, Muy
+     * alto, Muy bajo, ¡Acierto!), calculada una sola vez y
+     * reutilizada tanto en el mensaje principal como en el
+     * historial, para que nunca queden en desacuerdo.
+     * ============================================================
+     */
+    private static final class CategoriaCercania {
+
+        private final String etiqueta;
+
+        private final Color color;
+
+        private final String icono;
+
+        CategoriaCercania(String etiqueta, Color color, String icono) {
+
+            this.etiqueta = etiqueta;
+
+            this.color = color;
+
+            this.icono = icono;
+
+        }
 
     }
 
