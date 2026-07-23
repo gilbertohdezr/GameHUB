@@ -2,6 +2,8 @@ package vista;
 
 import interfaces.MenuListener;
 import juegos.construccion.PanelEnConstruccion;
+import juegos.dados.DadosGame;
+import juegos.dados.PanelDados;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -128,8 +130,9 @@ public class VentanaPrincipal extends JFrame implements MenuListener {
                 new PanelEnConstruccion("Tres en Raya"),
                 "TRES");
 
+        DadosGame dadosGame = new DadosGame();
         panelContenido.add(
-                new PanelEnConstruccion("Dados"),
+                new PanelDados(dadosGame, () -> mostrarVista("INICIO")),
                 "DADOS");
 
         panelContenido.add(
