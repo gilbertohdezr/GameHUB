@@ -1,7 +1,9 @@
 package vista;
 
 import interfaces.MenuListener;
+import interfaces.MiniJuego;
 import juegos.construccion.PanelEnConstruccion;
+import juegos.tres_en_raya.TresEnRaya;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -124,9 +126,8 @@ public class VentanaPrincipal extends JFrame implements MenuListener {
                 new PanelEnConstruccion("Piedra, Papel o Tijera"),
                 "PIEDRA");
 
-        panelContenido.add(
-                new PanelEnConstruccion("Tres en Raya"),
-                "TRES");
+        MiniJuego tresEnRaya = new TresEnRaya();
+        panelContenido.add(tresEnRaya.getPanel(), "TRES");
 
         panelContenido.add(
                 new PanelEnConstruccion("Dados"),
