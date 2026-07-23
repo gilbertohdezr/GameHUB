@@ -1,4 +1,5 @@
 import hub.GameHub;
+import javax.swing.SwingUtilities;
 
 /**
  * ============================================================
@@ -22,10 +23,10 @@ public class Main {
      * @param args Argumentos enviados desde la línea de comandos.
      */
     public static void main(String[] args) {
-
-        GameHub gameHub = new GameHub();
-        gameHub.iniciar();
-
+        SwingUtilities.invokeLater(() -> {
+            GameHub gameHub = new GameHub();
+            gameHub.iniciar();
+        });
     }
 
 }
