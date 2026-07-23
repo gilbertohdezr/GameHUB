@@ -61,7 +61,12 @@ public class TresEnRaya extends JPanel implements MiniJuego {
     private BotonAccion btnReiniciarMarcador;
     private BotonModo btnModoAmigo;
     private BotonModo btnModoBot;
+    private BotonModo btnDificultadFacil;
+    private BotonModo btnDificultadMedia;
+    private BotonModo btnDificultadDificil;
+    private JPanel panelDificultad;
     private ModoJuego modoJuego = ModoJuego.AMIGO;
+    private Dificultad dificultad = Dificultad.MEDIA;
     private char turnoActual = 'X';
     private boolean partidaTerminada;
     private boolean esperandoBot;
@@ -89,6 +94,12 @@ public class TresEnRaya extends JPanel implements MiniJuego {
         BOT
     }
 
+    private enum Dificultad {
+        FACIL,
+        MEDIA,
+        DIFICIL
+    }
+
     private void construirUI() {
         setLayout(new BorderLayout(0, 14));
         setBorder(BorderFactory.createEmptyBorder(20, 30, 18, 30));
@@ -100,8 +111,11 @@ public class TresEnRaya extends JPanel implements MiniJuego {
     }
 
     private JPanel crearEncabezado() {
-        JPanel encabezado = new JPanel(new BorderLayout(18, 0));
+        JPanel encabezado = new JPanel(new BorderLayout(0, 8));
         encabezado.setOpaque(false);
+
+        JPanel filaSuperior = new JPanel(new BorderLayout(18, 0));
+        filaSuperior.setOpaque(false);
 
         JPanel textos = new JPanel();
         textos.setOpaque(false);
@@ -121,8 +135,6 @@ public class TresEnRaya extends JPanel implements MiniJuego {
         textos.add(lblTitulo);
         textos.add(Box.createVerticalStrut(2));
         textos.add(lblDescripcion);
-        textos.add(Box.createVerticalStrut(8));
-        textos.add(crearSelectorModo());
 
         JPanel marcador = new JPanel(new GridLayout(1, 3, 8, 0));
         marcador.setOpaque(false);
@@ -136,8 +148,16 @@ public class TresEnRaya extends JPanel implements MiniJuego {
         marcador.add(tarjetaO);
         marcador.add(tarjetaEmpates);
 
-        encabezado.add(textos, BorderLayout.CENTER);
-        encabezado.add(marcador, BorderLayout.EAST);
+        filaSuperior.add(textos, BorderLayout.CENTER);
+        filaSuperior.add(marcador, BorderLayout.EAST);
+
+        JPanel controles = new JPanel(new BorderLayout(12, 0));
+        controles.setOpaque(false);
+        controles.add(crearSelectorModo(), BorderLayout.WEST);
+        controles.add(crearSelectorDificultad(), BorderLayout.EAST);
+
+        encabezado.add(filaSuperior, BorderLayout.CENTER);
+        encabezado.add(controles, BorderLayout.SOUTH);
         return encabezado;
     }
 
@@ -160,6 +180,44 @@ public class TresEnRaya extends JPanel implements MiniJuego {
 
         selector.add(btnModoAmigo);
         selector.add(btnModoBot);
+        return selector;
+    }
+
+    private JPanel crearSelectorDificultad() {
+        PanelRedondeado selector = new PanelRedondeado(
+                new Color(15, 23, 42, 185), 16);
+        selector.setLayout(new BorderLayout(4, 0));
+        selector.setBorder(BorderFactory.createEmptyBorder(3, 9, 3, 3));
+        selector.setPreferredSize(new Dimension(325, 31));
+
+        JLabel lblDificultad = new JLabel("DIFICULTAD");
+        lblDificultad.setFont(new Font("SansSerif", Font.BOLD, 9));
+        lblDificultad.setForeground(TEXTO_SUAVE);
+        lblDificultad.setBorder(
+                BorderFactory.createEmptyBorder(0, 0, 0, 5));
+
+        JPanel niveles = new JPanel(new GridLayout(1, 3, 3, 0));
+        niveles.setOpaque(false);
+
+        btnDificultadFacil = new BotonModo("FÁCIL");
+        btnDificultadFacil.addActionListener(
+                e -> cambiarDificultad(Dificultad.FACIL));
+
+        btnDificultadMedia = new BotonModo("MEDIO");
+        btnDificultadMedia.addActionListener(
+                e -> cambiarDificultad(Dificultad.MEDIA));
+
+        btnDificultadDificil = new BotonModo("DIFÍCIL");
+        btnDificultadDificil.addActionListener(
+                e -> cambiarDificultad(Dificultad.DIFICIL));
+
+        niveles.add(btnDificultadFacil);
+        niveles.add(btnDificultadMedia);
+        niveles.add(btnDificultadDificil);
+
+        selector.add(lblDificultad, BorderLayout.WEST);
+        selector.add(niveles, BorderLayout.CENTER);
+        panelDificultad = selector;
         return selector;
     }
 
@@ -319,12 +377,78 @@ public class TresEnRaya extends JPanel implements MiniJuego {
             return;
         }
 
-        int[] movimiento = buscarMejorMovimiento();
+        int[] movimiento = elegirMovimientoBot();
         esperandoBot = false;
 
         if (movimiento != null) {
             procesarMovimiento(movimiento[0], movimiento[1]);
         }
+    }
+
+    private int[] elegirMovimientoBot() {
+        if (dificultad == Dificultad.DIFICIL) {
+            return buscarMejorMovimiento();
+        }
+
+        if (dificultad == Dificultad.MEDIA) {
+            int[] victoria = buscarMovimientoInmediato('O');
+            if (victoria != null) {
+                return victoria;
+            }
+
+            int[] bloqueo = buscarMovimientoInmediato('X');
+            if (bloqueo != null) {
+                return bloqueo;
+            }
+
+            return aleatorio.nextDouble() < 0.75
+                    ? buscarMejorMovimiento()
+                    : buscarMovimientoAleatorio();
+        }
+
+        return aleatorio.nextDouble() < 0.25
+                ? buscarMejorMovimiento()
+                : buscarMovimientoAleatorio();
+    }
+
+    private int[] buscarMovimientoInmediato(char ficha) {
+        for (int fila = 0; fila < 3; fila++) {
+            for (int columna = 0; columna < 3; columna++) {
+                if (tablero[fila][columna] != '\0') {
+                    continue;
+                }
+
+                tablero[fila][columna] = ficha;
+                boolean completaLinea =
+                        obtenerLineaGanadora(ficha) != null;
+                tablero[fila][columna] = '\0';
+
+                if (completaLinea) {
+                    return new int[]{fila, columna};
+                }
+            }
+        }
+        return null;
+    }
+
+    private int[] buscarMovimientoAleatorio() {
+        List<int[]> movimientosDisponibles = new ArrayList<>();
+
+        for (int fila = 0; fila < 3; fila++) {
+            for (int columna = 0; columna < 3; columna++) {
+                if (tablero[fila][columna] == '\0') {
+                    movimientosDisponibles.add(
+                            new int[]{fila, columna});
+                }
+            }
+        }
+
+        if (movimientosDisponibles.isEmpty()) {
+            return null;
+        }
+
+        return movimientosDisponibles.get(
+                aleatorio.nextInt(movimientosDisponibles.size()));
     }
 
     private int[] buscarMejorMovimiento() {
@@ -494,16 +618,44 @@ public class TresEnRaya extends JPanel implements MiniJuego {
         reiniciarPuntuacion();
     }
 
+    private void cambiarDificultad(Dificultad nuevaDificultad) {
+        if (dificultad == nuevaDificultad) {
+            return;
+        }
+
+        dificultad = nuevaDificultad;
+        actualizarPresentacionModo();
+        reiniciarPuntuacion();
+    }
+
     private void actualizarPresentacionModo() {
         boolean contraBot = modoJuego == ModoJuego.BOT;
         btnModoAmigo.setSeleccionado(!contraBot);
         btnModoBot.setSeleccionado(contraBot);
+        panelDificultad.setVisible(contraBot);
+
+        btnDificultadFacil.setSeleccionado(
+                dificultad == Dificultad.FACIL);
+        btnDificultadMedia.setSeleccionado(
+                dificultad == Dificultad.MEDIA);
+        btnDificultadDificil.setSeleccionado(
+                dificultad == Dificultad.DIFICIL);
 
         tarjetaX.setTitulo(contraBot ? "TÚ  ·  X" : "JUGADOR X");
         tarjetaO.setTitulo(contraBot ? "BOT  ·  O" : "JUGADOR O");
         lblInstrucciones.setText(contraBot
-                ? "Tú eres X  •  El bot juega con O"
+                ? "Tú eres X  •  Nivel " + nombreDificultad()
                 : "X comienza  •  Elige una casilla libre");
+        revalidate();
+        repaint();
+    }
+
+    private String nombreDificultad() {
+        return switch (dificultad) {
+            case FACIL -> "fácil";
+            case MEDIA -> "medio";
+            case DIFICIL -> "difícil";
+        };
     }
 
     private void actualizarAnimaciones() {
@@ -535,6 +687,9 @@ public class TresEnRaya extends JPanel implements MiniJuego {
         tarjetaEmpates.actualizar(delta, tiempoAnimacion);
         btnModoAmigo.actualizar(delta);
         btnModoBot.actualizar(delta);
+        btnDificultadFacil.actualizar(delta);
+        btnDificultadMedia.actualizar(delta);
+        btnDificultadDificil.actualizar(delta);
         btnReiniciarMarcador.actualizar(delta);
         btnNuevaPartida.actualizar(delta);
         actualizarConfeti(delta);
