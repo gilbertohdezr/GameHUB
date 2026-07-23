@@ -2,6 +2,7 @@ package vista;
 
 import interfaces.MenuListener;
 import juegos.construccion.PanelEnConstruccion;
+import juegos.piedra.PanelJuegoPPT;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -120,9 +121,7 @@ public class VentanaPrincipal extends JFrame implements MenuListener {
                 new PanelEnConstruccion("Adivina Número"),
                 "ADIVINA");
 
-        panelContenido.add(
-                new PanelEnConstruccion("Piedra, Papel o Tijera"),
-                "PIEDRA");
+        panelContenido.add(new PanelJuegoPPT(), "PIEDRA");
 
         panelContenido.add(
                 new PanelEnConstruccion("Tres en Raya"),
