@@ -2,6 +2,7 @@ package vista;
 
 import interfaces.MenuListener;
 import juegos.construccion.PanelEnConstruccion;
+import juegos.memorama.PanelMemorama; // <-- 1. IMPORTAMOS TU JUEGO
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -132,8 +133,9 @@ public class VentanaPrincipal extends JFrame implements MenuListener {
                 new PanelEnConstruccion("Dados"),
                 "DADOS");
 
+        // <-- 2. REEMPLAZAMOS PanelEnConstruccion POR TU JUEGO REAL
         panelContenido.add(
-                new PanelEnConstruccion("Memorama"),
+                new PanelMemorama(),
                 "MEMORAMA");
 
         add(panelContenido, BorderLayout.CENTER);
