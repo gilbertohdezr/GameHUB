@@ -1,6 +1,7 @@
 package vista;
 
 import interfaces.MenuListener;
+import juegos.adivina.AdivinaPanel;
 import juegos.construccion.PanelEnConstruccion;
 
 import java.awt.BorderLayout;
@@ -117,7 +118,7 @@ public class VentanaPrincipal extends JFrame implements MenuListener {
         panelContenido.add(new PanelInicio(), "INICIO");
 
         panelContenido.add(
-                new PanelEnConstruccion("Adivina Número"),
+                new AdivinaPanel().getPanel(),
                 "ADIVINA");
 
         panelContenido.add(
