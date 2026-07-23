@@ -24,12 +24,7 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-/**
- * Juego local de tres en raya para dos jugadores.
- *
- * Toda la partida vive únicamente en memoria. Al cerrar GameHUB no se
- * conserva el tablero ni el marcador.
- */
+
 public class TresEnRaya extends JPanel implements MiniJuego {
 
     private static final Color FONDO_SUPERIOR = new Color(15, 23, 42);
@@ -367,10 +362,7 @@ public class TresEnRaya extends JPanel implements MiniJuego {
         }
     }
 
-    /**
-     * Mantiene el tablero cuadrado y lo adapta a la altura realmente
-     * disponible dentro de la ventana.
-     */
+
     private static class ContenedorCuadrado extends JPanel {
 
         private static final int TAMANO_MAXIMO = 409;
