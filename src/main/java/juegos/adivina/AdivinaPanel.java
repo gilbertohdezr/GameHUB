@@ -30,6 +30,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -1262,22 +1263,29 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         switch (resultado) {
 
-            case ACIERTO:
+            case ACIERTO: {
 
                 actualizarTarjetaMensaje("🎉", "¡Correcto!",
                         "El número secreto era " + modelo.getNumeroSecreto() + ".",
                         new Color(224, 247, 233), COLOR_CERCA);
 
-                registrarVictoria(dificultad);
+                int intentosUsados = modelo.getIntentosUsados();
+
+                int puntosRonda = registrarVictoria(dificultad);
 
                 finalizarPartida();
 
+                mostrarDialogoResultado(true, modelo.getNumeroSecreto(), intentosUsados,
+                        segundosTranscurridos, puntosRonda);
+
                 break;
+
+            }
 
             case MAYOR:
 
                 actualizarTarjetaMensaje(categoria.icono, categoria.etiqueta,
-                        "El número que ingresaste es menor al número secreto. Intenta con uno más alto.",
+                        "Intenta con un número más alto.",
                         mezclar(categoria.color, Color.WHITE, 0.82), categoria.color);
 
                 break;
@@ -1285,20 +1293,27 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
             case MENOR:
 
                 actualizarTarjetaMensaje(categoria.icono, categoria.etiqueta,
-                        "El número que ingresaste es mayor al número secreto. Intenta con uno más bajo.",
+                        "Intenta con un número más bajo.",
                         mezclar(categoria.color, Color.WHITE, 0.82), categoria.color);
 
                 break;
 
-            case SIN_INTENTOS:
+            case SIN_INTENTOS: {
 
                 actualizarTarjetaMensaje("😔", "Sin intentos",
                         "Se acabaron tus intentos. El número era " + modelo.getNumeroSecreto() + ".",
                         new Color(253, 226, 226), COLOR_ALTO);
 
+                int intentosUsados = modelo.getIntentosUsados();
+
                 finalizarPartida();
 
+                mostrarDialogoResultado(false, modelo.getNumeroSecreto(), intentosUsados,
+                        segundosTranscurridos, 0);
+
                 break;
+
+            }
 
             default:
 
@@ -1317,9 +1332,12 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
     }
 
     /**
-     * Determina la categoría de cercanía de un intento, usada
-     * tanto en el mensaje principal como en el historial, para
-     * que ambos siempre coincidan.
+     * Determina la categoría de cercanía de un intento,
+     * combinando en una sola etiqueta tanto la intensidad
+     * (qué tan cerca) como la dirección (alto/bajo). Al existir
+     * un único texto generado aquí y reutilizado en el mensaje
+     * principal y en el historial, ambos siempre coinciden: no
+     * hay dos piezas de información que puedan desincronizarse.
      *
      * @param resultado         Resultado del intento.
      * @param proporcionLejania Proporción de distancia (0 a 1).
@@ -1334,31 +1352,35 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         }
 
+        // Resultado.MENOR: el secreto es menor que el intento (te pasaste, ve más bajo).
+        // Resultado.MAYOR: el secreto es mayor que el intento (te quedaste corto, ve más alto).
+        String direccion = resultado == Resultado.MENOR ? "alto" : "bajo";
+
+        String flecha = resultado == Resultado.MENOR ? "🔻" : "🔺";
+
         if (proporcionLejania <= 0.05) {
 
-            return new CategoriaCercania("Muy cerca", COLOR_CERCA, "😊");
+            return new CategoriaCercania("Muy cerca, un poco " + direccion, COLOR_CERCA, "🎯");
 
         }
 
         if (proporcionLejania <= 0.15) {
 
-            return new CategoriaCercania("Cerca", COLOR_TIBIO, "🙂");
+            return new CategoriaCercania("Cerca, ligeramente " + direccion, COLOR_TIBIO, flecha);
 
         }
 
         if (proporcionLejania <= 0.35) {
 
-            return new CategoriaCercania("Lejos", COLOR_LEJOS, "😐");
+            return new CategoriaCercania("Lejos, bastante " + direccion, COLOR_LEJOS, flecha);
 
         }
 
-        if (resultado == Resultado.MENOR) {
+        Color colorExtremo = resultado == Resultado.MENOR ? COLOR_ALTO : COLOR_BAJO;
 
-            return new CategoriaCercania("Muy alto", COLOR_ALTO, "🔥");
+        String iconoExtremo = resultado == Resultado.MENOR ? "🔥" : "🧊";
 
-        }
-
-        return new CategoriaCercania("Muy bajo", COLOR_BAJO, "🧊");
+        return new CategoriaCercania("Muy " + direccion, colorExtremo, iconoExtremo);
 
     }
 
@@ -1413,8 +1435,10 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
      * Registra la puntuación y el récord al ganar una ronda.
      *
      * @param dificultad Dificultad de la ronda ganada.
+     *
+     * @return Puntos ganados en esta ronda.
      */
-    private void registrarVictoria(Dificultad dificultad) {
+    private int registrarVictoria(Dificultad dificultad) {
 
         int intentosUsados = modelo.getIntentosUsados();
 
@@ -1443,6 +1467,8 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         actualizarRecord();
 
+        return puntosRonda;
+
     }
 
     /**
@@ -1456,6 +1482,195 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
         txtNumero.setEnabled(false);
 
         btnAdivinar.setEnabled(false);
+
+    }
+
+    /**
+     * Muestra una ventana emergente modal con el resultado
+     * final de la partida (victoria o derrota), junto con un
+     * resumen de intentos, tiempo y puntos ganados.
+     *
+     * @param victoria         true si el jugador acertó.
+     * @param numeroSecreto    Número secreto de la ronda.
+     * @param intentosUsados   Intentos utilizados.
+     * @param segundos         Segundos transcurridos.
+     * @param puntosGanados    Puntos ganados (0 si no hubo victoria).
+     */
+    private void mostrarDialogoResultado(boolean victoria, int numeroSecreto, int intentosUsados,
+            int segundos, int puntosGanados) {
+
+        Color colorTema = victoria ? COLOR_CERCA : COLOR_ALTO;
+
+        JDialog dialogo = new JDialog(javax.swing.SwingUtilities.getWindowAncestor(this),
+                victoria ? "¡Ganaste!" : "Sin intentos", java.awt.Dialog.ModalityType.APPLICATION_MODAL);
+
+        dialogo.setResizable(false);
+
+        JPanel contenido = new JPanel();
+
+        contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
+
+        contenido.setBackground(Color.WHITE);
+
+        contenido.setBorder(BorderFactory.createEmptyBorder(28, 34, 24, 34));
+
+        JLabel lblIcono = new JLabel(victoria ? "🎉" : "😔");
+
+        lblIcono.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        lblIcono.setFont(new Font("SansSerif", Font.PLAIN, 48));
+
+        JLabel lblTitulo = new JLabel(victoria ? "¡Lo lograste!" : "Se acabaron los intentos");
+
+        lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        lblTitulo.setFont(new Font("SansSerif", Font.BOLD, 22));
+
+        lblTitulo.setForeground(colorTema);
+
+        JLabel lblDetalle = new JLabel("El número secreto era " + numeroSecreto + ".");
+
+        lblDetalle.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        lblDetalle.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+        lblDetalle.setForeground(TEXTO_APOYO);
+
+        contenido.add(lblIcono);
+
+        contenido.add(Box.createVerticalStrut(10));
+
+        contenido.add(lblTitulo);
+
+        contenido.add(Box.createVerticalStrut(6));
+
+        contenido.add(lblDetalle);
+
+        contenido.add(Box.createVerticalStrut(20));
+
+        JPanel filaEstadisticas = new JPanel(
+                new java.awt.GridLayout(1, victoria ? 3 : 2, 18, 0));
+
+        filaEstadisticas.setOpaque(false);
+
+        filaEstadisticas.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        filaEstadisticas.add(crearEstadisticaDialogo("Intentos", String.valueOf(intentosUsados)));
+
+        filaEstadisticas.add(crearEstadisticaDialogo("Tiempo", formatearTiempo(segundos)));
+
+        if (victoria) {
+
+            filaEstadisticas.add(crearEstadisticaDialogo("Puntos", "+" + puntosGanados));
+
+        }
+
+        contenido.add(filaEstadisticas);
+
+        contenido.add(Box.createVerticalStrut(24));
+
+        JPanel filaBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+
+        filaBotones.setOpaque(false);
+
+        filaBotones.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JButton btnJugarDeNuevo = new JButton("🔄  Jugar de nuevo");
+
+        btnJugarDeNuevo.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        btnJugarDeNuevo.setForeground(Color.WHITE);
+
+        btnJugarDeNuevo.setBackground(ACENTO);
+
+        btnJugarDeNuevo.setOpaque(true);
+
+        btnJugarDeNuevo.setBorderPainted(false);
+
+        btnJugarDeNuevo.setFocusPainted(false);
+
+        btnJugarDeNuevo.setBorder(BorderFactory.createEmptyBorder(9, 16, 9, 16));
+
+        btnJugarDeNuevo.addActionListener(e -> {
+
+            dialogo.dispose();
+
+            reiniciar();
+
+        });
+
+        JButton btnCerrar = new JButton("Cerrar");
+
+        btnCerrar.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+        btnCerrar.setForeground(new Color(60, 60, 60));
+
+        btnCerrar.setBackground(new Color(238, 238, 242));
+
+        btnCerrar.setOpaque(true);
+
+        btnCerrar.setBorderPainted(false);
+
+        btnCerrar.setFocusPainted(false);
+
+        btnCerrar.setBorder(BorderFactory.createEmptyBorder(9, 16, 9, 16));
+
+        btnCerrar.addActionListener(e -> dialogo.dispose());
+
+        filaBotones.add(btnJugarDeNuevo);
+
+        filaBotones.add(btnCerrar);
+
+        contenido.add(filaBotones);
+
+        dialogo.setContentPane(contenido);
+
+        dialogo.pack();
+
+        dialogo.setLocationRelativeTo(this);
+
+        dialogo.setVisible(true);
+
+    }
+
+    /**
+     * Crea un bloque de estadística (valor grande + etiqueta)
+     * para usarse dentro del diálogo de resultado.
+     *
+     * @param etiqueta Nombre de la estadística.
+     * @param valor    Valor a mostrar.
+     *
+     * @return Panel con la estadística.
+     */
+    private JPanel crearEstadisticaDialogo(String etiqueta, String valor) {
+
+        JPanel panel = new JPanel();
+
+        panel.setOpaque(false);
+
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        JLabel lblValor = new JLabel(valor);
+
+        lblValor.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        lblValor.setFont(new Font("SansSerif", Font.BOLD, 18));
+
+        lblValor.setForeground(TEXTO_PRINCIPAL);
+
+        JLabel lblEtiqueta = new JLabel(etiqueta);
+
+        lblEtiqueta.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        lblEtiqueta.setFont(new Font("SansSerif", Font.PLAIN, 11));
+
+        lblEtiqueta.setForeground(TEXTO_APOYO);
+
+        panel.add(lblValor);
+
+        panel.add(lblEtiqueta);
+
+        return panel;
 
     }
 
