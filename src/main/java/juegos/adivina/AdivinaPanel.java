@@ -226,6 +226,8 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
     private int recordSegundos;
 
+    private boolean cronometroIniciado;
+
     private String[] pistasActuales = {"", "", ""};
 
     private int indicePista;
@@ -1255,6 +1257,14 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         double proporcionLejania = rango == 0 ? 0 : Math.min(1, (double) distancia / rango);
 
+        if (!cronometroIniciado) {
+
+            cronometroIniciado = true;
+
+            temporizadorJuego.start();
+
+        }
+
         Resultado resultado = modelo.procesarIntento(numero);
 
         CategoriaCercania categoria = categorizarCercania(resultado, proporcionLejania);
@@ -1941,7 +1951,9 @@ public class AdivinaPanel extends JPanel implements MiniJuego {
 
         lblTiempo.setText(formatearTiempo(0));
 
-        temporizadorJuego.restart();
+        temporizadorJuego.stop();
+
+        cronometroIniciado = false;
 
         pistasActuales = generarPistas(modelo.getNumeroSecreto(), dificultad);
 
